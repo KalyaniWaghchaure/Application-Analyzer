@@ -1,0 +1,11 @@
+Flask==2.3.3
+selenium==4.15.2
+beautifulsoup4==4.12.2
+requests==2.31.0
+pandas==2.1.1
+webdriver-manager==4.0.1
+lxml==4.9.3
+Werkzeug==2.3.7
+
+# For cPanel deployment, also include:
+gunicorn==21.2.0

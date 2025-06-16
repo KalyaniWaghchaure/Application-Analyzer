@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Business Social Presence Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px auto;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+
+        .header h1 {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .filter-section {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .table-container {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .table td {
+            vertical-align: middle;
+            text-align: center;
+            border-color: #e9ecef;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner-border {
+            color: #667eea;
+        }
+
+        .badge {
+            border-radius: 20px;
+            padding: 8px 12px;
+        }
+
+        .filter-checkbox {
+            margin-right: 20px;
+        }
+
+        .stats-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .instagram-handle {
+            color: #e1306c;
+            font-weight: 600;
+        }
+
+        .website-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .website-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <div class="header">
+                <h1><i class="fas fa-chart-line"></i> Local Business Social Presence Analyzer</h1>
+                <p class="text-muted">Discover local businesses and their social media presence</p>
+            </div>
+
+            <!-- Input Section -->
+            <div class="input-section">
+                <h3><i class="fas fa-search"></i> Search Parameters</h3>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="cityInput" class="form-label">City Name</label>
+                        <input type="text" class="form-control" id="cityInput" placeholder="e.g., Pune, Mumbai">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="keywordInput" class="form-label">Business Keyword</label>
+                        <input type="text" class="form-control" id="keywordInput" placeholder="e.g., Cafe, Digital Agency">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="limitInput" class="form-label">Limit</label>
+                        <select class="form-control" id="limitInput">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100" onclick="scrapeBusinesses()">
+                            <i class="fas fa-play"></i> Start Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div class="loading" id="loadingIndicator">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing businesses... This may take a few minutes.</p>
+            </div>
+
+            <!-- Stats Section -->
+            <div id="statsSection" style="display: none;">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 id="totalBusinesses">0</h4>
+                            <p>Total Businesses</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 id="withWebsite">0</h4>
+                            <p>With Website</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <h4 id="withInstagram">0</h4>
+                            <p>With Instagram</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card">
+                            <button class="btn btn-light" onclick="exportToCSV()">
+                                <i class="fas fa-download"></i> Export CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="filter-section" id="filterSection" style="display: none;">
+                <h5><i class="fas fa-filter"></i> Filters</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-check filter-checkbox">
+                            <input class="form-check-input" type="checkbox" id="noWebsiteFilter">
+                            <label class="form-check-label" for="noWebsiteFilter">
+                                Show businesses without website
+                            </label>
+                        </div>
+                        <div class="form-check filter-checkbox">
+                            <input class="form-check-input" type="checkbox" id="noInstagramFilter">
+                            <label class="form-check-label" for="noInstagramFilter">
+                                Show businesses without Instagram
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Search by business name or phone...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Table -->
+            <div class="table-container" id="resultsContainer" style="display: none;">
+                <h5><i class="fas fa-table"></i> Business Analysis Results</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Business Name</th>
+                                <th>Contact Number</th>
+                                <th>Website</th>
+                                <th>Instagram Handle</th>
+                                <th>Instagram Bio</th>
+                                <th>Followers</th>
+                            </tr>
+                        </thead>
+                        <tbody id="businessTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let businessData = [];
+        let filteredData = [];
+
+        async function scrapeBusinesses() {
+            const city = document.getElementById('cityInput').value.trim();
+            const keyword = document.getElementById('keywordInput').value.trim();
+            const limit = document.getElementById('limitInput').value;
+
+            if (!city || !keyword) {
+                alert('Please enter both city and business keyword.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingIndicator').style.display = 'block';
+            document.getElementById('statsSection').style.display = 'none';
+            document.getElementById('filterSection').style.display = 'none';
+            document.getElementById('resultsContainer').style.display = 'none';
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        city: city,
+                        keyword: keyword,
+                        limit: parseInt(limit)
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    businessData = result.businesses;
+                    filteredData = [...businessData];
+                    displayResults();
+                    updateStats();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error occurred while scraping: ' + error.message);
+            } finally {
+                document.getElementById('loadingIndicator').style.display = 'none';
+            }
+        }
+
+        function displayResults() {
+            const tbody = document.getElementById('businessTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(business => {
+                const row = document.createElement('tr');
+
+                const websiteCell = business.website !== 'Not found' ?
+                    `<a href="${business.website}" target="_blank" class="website-link">${business.website}</a>` :
+                    '<span class="badge bg-warning">No Website</span>';
+
+                const instagramCell = business.instagram_handle !== 'Not found' ?
+                    `<span class="instagram-handle">${business.instagram_handle}</span>` :
+                    '<span class="badge bg-info">Not Found</span>';
+
+                row.innerHTML = `
+                    <td><strong>${business.name}</strong></td>
+                    <td>${business.phone}</td>
+                    <td>${websiteCell}</td>
+                    <td>${instagramCell}</td>
+                    <td>${business.instagram_bio || 'N/A'}</td>
+                    <td>${business.instagram_followers || 'N/A'}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // Show sections
+            document.getElementById('statsSection').style.display = 'block';
+            document.getElementById('filterSection').style.display = 'block';
+            document.getElementById('resultsContainer').style.display = 'block';
+
+            // Add event listeners for filters
+            setupFilters();
+        }
+
+        function updateStats() {
+            const total = businessData.length;
+            const withWebsite = businessData.filter(b => b.website !== 'Not found').length;
+            const withInstagram = businessData.filter(b => b.instagram_handle !== 'Not found').length;
+
+            document.getElementById('totalBusinesses').textContent = total;
+            document.getElementById('withWebsite').textContent = withWebsite;
+            document.getElementById('withInstagram').textContent = withInstagram;
+        }
+
+        function setupFilters() {
+            const noWebsiteFilter = document.getElementById('noWebsiteFilter');
+            const noInstagramFilter = document.getElementById('noInstagramFilter');
+            const searchInput = document.getElementById('searchInput');
+
+            function applyFilters() {
+                filteredData = businessData.filter(business => {
+                    let show = true;
+
+                    // No website filter
+                    if (noWebsiteFilter.checked && business.website !== 'Not found') {
+                        show = false;
+                    }
+
+                    // No Instagram filter
+                    if (noInstagramFilter.checked && business.instagram_handle !== 'Not found') {
+                        show = false;
+                    }
+
+                    // Search filter
+                    const searchTerm = searchInput.value.toLowerCase();
+                    if (searchTerm && !business.name.toLowerCase().includes(searchTerm) &&
+                        !business.phone.toLowerCase().includes(searchTerm)) {
+                        show = false;
+                    }
+
+                    return show;
+                });
+
+                displayFilteredResults();
+            }
+
+            noWebsiteFilter.addEventListener('change', applyFilters);
+            noInstagramFilter.addEventListener('change', applyFilters);
+            searchInput.addEventListener('input', applyFilters);
+        }
+
+        function displayFilteredResults() {
+            const tbody = document.getElementById('businessTableBody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(business => {
+                const row = document.createElement('tr');
+
+                const websiteCell = business.website !== 'Not found' ?
+                    `<a href="${business.website}" target="_blank" class="website-link">${business.website}</a>` :
+                    '<span class="badge bg-warning">No Website</span>';
+
+                const instagramCell = business.instagram_handle !== 'Not found' ?
+                    `<span class="instagram-handle">${business.instagram_handle}</span>` :
+                    '<span class="badge bg-info">Not Found</span>';
+
+                row.innerHTML = `
+                    <td><strong>${business.name}</strong></td>
+                    <td>${business.phone}</td>
+                    <td>${websiteCell}</td>
+                    <td>${instagramCell}</td>
+                    <td>${business.instagram_bio || 'N/A'}</td>
+                    <td>${business.instagram_followers || 'N/A'}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        function exportToCSV() {
+            if (businessData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const dataToExport = encodeURIComponent(JSON.stringify(businessData));
+            window.open(`/export_csv?data=${dataToExport}`, '_blank');
+        }
+    </script>
+</body>
+</html>
