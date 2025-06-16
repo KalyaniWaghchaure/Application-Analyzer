@@ -22,13 +22,7 @@ Tech Stack
 • Backend: Flask or FastAPI 
 • Frontend: Flask Templates (Jinja) or Streamlit 
 • Instagram Scraping: Search via Google + Scrape with requests or 
-Instagram unauthenticated view 
-Bonus Points for Candidate - Uses pagination or limits to avoid being blocked - Handles cases where Instagram is private or not available - Provides download option for table (CSV export) - Deploys locally or via PythonAnywhere/Render 
-Example Admin UI (Simplified) 
-Business Name | Contact No | Website | Instagram --------------|------------|---------|---------- 
-ABC Digital   | +91-98123  | www.abcdigital.com | @abcdigital.in 
-Star Cafe     | +91-94562  | -                  | - 
-Bloom Salon   | +91-93452  | www.bloomsalon.in  | @bloombeauty 
+
  
 Filters: 
 ☑ No Website 
